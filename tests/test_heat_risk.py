@@ -48,6 +48,20 @@ def test_assessment_endpoint_personalizes_recommendations() -> None:
     assert any("older adults" in item for item in body["recommendations"])
 
 
+def test_experimental_model_endpoint_returns_probabilities() -> None:
+    response = request(
+        "POST",
+        "/api/v1/heat-risk/model-assess",
+        json={"temperature_c": 35, "humidity_percent": 60},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["risk_level"] in {"low", "caution", "extreme_caution", "danger", "extreme_danger"}
+    assert abs(sum(body["class_probabilities"].values()) - 1) < 1e-5
+    assert "imitate" in body["disclaimer"]
+
+
 def test_rejects_invalid_humidity() -> None:
     response = request(
         "POST",
@@ -55,6 +69,14 @@ def test_rejects_invalid_humidity() -> None:
         json={"temperature_c": 35, "humidity_percent": 120},
     )
     assert response.status_code == 422
+
+
+def test_live_map_dashboard_is_served() -> None:
+    response = request("GET", "/")
+
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "heat-risk-map" in response.text
 
 
 def test_forecast_endpoint_preserves_timestamps() -> None:

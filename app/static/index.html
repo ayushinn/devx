@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f3f3ed" />
+    <title>Thermal Watch | Live Heat Risk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="workspace" id="heat-risk-map">
+      <aside class="insights" aria-label="Live heat risk details">
+        <header class="brand-row">
+          <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="brand-name">THERMAL<span>WATCH</span></div>
+          <span class="live-pill"><i></i> LIVE</span>
+        </header>
+
+        <section class="location-block">
+          <p class="eyebrow">HEAT RISK MONITOR</p>
+          <h1 id="location-name">Mumbai</h1>
+          <p class="coordinates" id="coordinates">19.0760 N, 72.8777 E</p>
+          <form class="search-form" id="search-form">
+            <i data-lucide="search" aria-hidden="true"></i>
+            <input id="location-search" type="search" placeholder="Search a city" autocomplete="off" aria-label="Search a city" />
+            <button type="submit" aria-label="Find city"><i data-lucide="arrow-up-right"></i></button>
+          </form>
+        </section>
+
+        <section class="current-section" aria-live="polite">
+          <div class="section-heading">
+            <span>RIGHT NOW</span>
+            <span class="updated" id="updated-at">Fetching conditions</span>
+          </div>
+          <div class="risk-display" id="risk-display" data-risk="loading">
+            <div class="heat-value"><strong id="heat-index">--</strong><span>°C</span><small>FEELS LIKE</small></div>
+            <div class="risk-label"><span class="risk-dot"></span><span id="risk-level">Loading</span></div>
+          </div>
+          <div class="weather-facts">
+            <div class="weather-fact"><i data-lucide="thermometer"></i><span class="fact-label">AIR TEMP</span><strong id="air-temperature">--°</strong></div>
+            <div class="weather-fact"><i data-lucide="droplets"></i><span class="fact-label">HUMIDITY</span><strong id="humidity">--%</strong></div>
+            <div class="weather-fact"><i data-lucide="map-pin"></i><span class="fact-label">TIME ZONE</span><strong class="timezone" id="timezone">--</strong></div>
+          </div>
+          <div class="heatwave-note" id="heatwave-note">
+            <i data-lucide="sun"></i>
+            <span id="heatwave-status">Checking heat outlook</span>
+            <i data-lucide="arrow-right" class="note-arrow"></i>
+          </div>
+        </section>
+
+        <section class="forecast-section">
+          <div class="section-heading"><span>7-DAY OUTLOOK</span><span class="unit-label">DAILY PEAK</span></div>
+          <div class="forecast-list" id="forecast-list"><div class="forecast-empty">Loading forecast…</div></div>
+        </section>
+
+        <section class="guidance-section">
+          <div class="section-heading"><span>STAY SAFE</span><i data-lucide="shield-check"></i></div>
+          <ul id="recommendations"><li>Fetching local heat guidance.</li></ul>
+        </section>
+
+        <footer class="panel-footer">
+          <span>OPEN-METEO · ESRI SATELLITE</span>
+          <span class="disclaimer">Screening estimate, not an official warning.</span>
+        </footer>
+      </aside>
+
+      <section class="map-shell" aria-label="Interactive live heat risk map">
+        <div id="map" role="application" aria-label="Map. Click a point to view its live heat risk."></div>
+        <div class="map-topline">
+          <div class="map-caption"><span class="map-caption-mark"></span><div><strong id="map-layer-name">Satellite overview</strong><small>SELECT A PLACE ON THE MAP</small></div></div>
+          <button class="locate-button" id="locate-button" type="button" title="Use my location" aria-label="Use my location"><i data-lucide="crosshair"></i></button>
+        </div>
+        <div class="map-legend"><span>HEAT INDEX</span><i class="legend-low"></i><i class="legend-caution"></i><i class="legend-danger"></i><i class="legend-extreme"></i><small>LOW <b>EXTREME</b></small></div>
+        <div class="map-message" id="map-message" role="status"></div>
+      </section>
+    </main>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

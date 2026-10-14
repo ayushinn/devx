@@ -1,10 +1,14 @@
 from datetime import datetime
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app.heat_risk import assess_heat_risk
+from app.ml_heat_risk import predict_heat_risk
 from app.weather import WeatherProviderError, build_live_report, fetch_open_meteo_forecast
 
 app = FastAPI(
@@ -15,6 +19,13 @@ app = FastAPI(
     ),
     version="0.1.0",
 )
+STATIC_DIR = Path(__file__).parent / "static"
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def dashboard() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 class HeatObservation(BaseModel):
@@ -30,6 +41,13 @@ class HeatRiskAssessment(BaseModel):
     risk_code: int
     recommendations: list[str]
     observed_at: datetime | None = None
+
+
+class ModelHeatRiskAssessment(BaseModel):
+    risk_level: str
+    risk_code: int
+    class_probabilities: dict[str, float]
+    disclaimer: str
 
 
 @app.get("/health", tags=["system"])
@@ -52,6 +70,22 @@ def assess(observation: HeatObservation) -> dict[str, object]:
         ),
         "observed_at": observation.observed_at,
     }
+
+
+@app.post(
+    "/api/v1/heat-risk/model-assess",
+    response_model=ModelHeatRiskAssessment,
+    tags=["heat risk"],
+    summary="Get an experimental trained-model heat-risk estimate",
+)
+def assess_with_model(observation: HeatObservation) -> dict[str, object]:
+    prediction = predict_heat_risk(observation.temperature_c, observation.humidity_percent)
+    if prediction is None:
+        raise HTTPException(
+            status_code=503,
+            detail="The experimental heat-risk model has not been trained yet.",
+        )
+    return prediction
 
 
 @app.post(
